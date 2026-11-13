@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -20,13 +21,20 @@ type Database struct {
 	Schema   string
 }
 
-func connectDatabase() (*gorm.DB, error) {
-	dsn := "host=" + getDataFromEnv().Host +
-		" user=" + getDataFromEnv().Username +
-		" password=" + getDataFromEnv().Password +
-		" dbname=" + getDataFromEnv().Database +
-		" port=" + getDataFromEnv().Port +
-		" search_path=" + getDataFromEnv().Schema +
+var (
+	dbInstance *gorm.DB
+	dbOnce     sync.Once
+	dbErr      error
+)
+
+func ConnectDatabase() (*gorm.DB, error) {
+	conf := getDataFromEnv()
+	dsn := "host=" + conf.Host +
+		" user=" + conf.Username +
+		" password=" + conf.Password +
+		" dbname=" + conf.Database +
+		" port=" + conf.Port +
+		" search_path=" + conf.Schema +
 		" sslmode=disable"
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -39,10 +47,15 @@ func connectDatabase() (*gorm.DB, error) {
 		return nil, err
 	}
 
+	dbSQL.SetMaxIdleConns(10)
+	dbSQL.SetMaxOpenConns(100)
+	dbSQL.SetConnMaxLifetime(time.Hour)
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	if err := dbSQL.PingContext(ctx); err != nil {
+		_ = dbSQL.Close()
 		return nil, err
 	}
 
