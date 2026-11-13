@@ -1,0 +1,12 @@
+services:
+  database:
+    image: postgres:18.4-alpine3.23
+    container_name: "database"
+    ports:
+      - "5432:5432"
+    volumes:
+      - /Users/ibnuaulianugrahaalihaq/Database/PostgresTraining:/var/lib/postgresql
+    environment:
+      POSTGRES_USER: ibnuauliana
+      POSTGRES_PASSWORD: "P!sang#123"
+      POSTGRES_DB: training
