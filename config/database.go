@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -28,14 +29,18 @@ var (
 )
 
 func ConnectDatabase() (*gorm.DB, error) {
+	dbOnce.Do(func() {
+		dbInstance, dbErr = openDatabase()
+	})
+	return dbInstance, dbErr
+}
+
+func openDatabase() (*gorm.DB, error) {
 	conf := getDataFromEnv()
-	dsn := "host=" + conf.Host +
-		" user=" + conf.Username +
-		" password=" + conf.Password +
-		" dbname=" + conf.Database +
-		" port=" + conf.Port +
-		" search_path=" + conf.Schema +
-		" sslmode=disable"
+	dsn := fmt.Sprintf(
+		"host=%s user=%s password=%s dbname=%s port=%s search_path=%s sslmode=disable",
+		conf.Host, conf.Username, conf.Password, conf.Database, conf.Port, conf.Schema,
+	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -48,8 +53,9 @@ func ConnectDatabase() (*gorm.DB, error) {
 	}
 
 	dbSQL.SetMaxIdleConns(10)
-	dbSQL.SetMaxOpenConns(100)
+	dbSQL.SetMaxOpenConns(50)
 	dbSQL.SetConnMaxLifetime(time.Hour)
+	dbSQL.SetConnMaxIdleTime(time.Hour)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

@@ -41,7 +41,7 @@ func main() {
 	}()
 
 	// Registering Route
-	routes.Register(runEcho)
+	routes.Register(runEcho, db)
 	if err := runEcho.Start(":" + port); err != nil {
 		log.Fatal(err)
 	}

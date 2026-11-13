@@ -1,31 +1,41 @@
 package ref_task_status
 
 import (
-	"fmt"
+	"context"
 	"net/http"
+	"time"
 	"to-do-microservices/constant"
 	"to-do-microservices/models"
 	"to-do-microservices/repositories"
 
 	"github.com/labstack/echo/v5"
+	"gorm.io/gorm"
 )
 
-func GetListRefTaskStatus(echoCtx *echo.Context) error {
-	refTaskStatus, err := repositories.GetListTaskStatus()
-	if err != nil {
-		fmt.Println(err)
-	}
+func GetListRefTaskStatus(db *gorm.DB) echo.HandlerFunc {
+	return func(echoCtx *echo.Context) error {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
 
-	if len(refTaskStatus) == 0 {
-		return echoCtx.JSON(http.StatusNotFound, constant.EmptyResponse{
-			HttpCode: http.StatusNotFound,
-			Message:  "Ref Status Not Found",
+		data, err := repositories.GetListTaskStatus(ctx, db)
+		if err != nil {
+			return echoCtx.JSON(http.StatusInternalServerError, constant.BadRequestResponse{
+				HttpCode: http.StatusInternalServerError,
+				Message:  err.Error(),
+			})
+		}
+
+		if len(data) == 0 {
+			return echoCtx.JSON(http.StatusNotFound, constant.EmptyResponse{
+				HttpCode: http.StatusNotFound,
+				Message:  "Ref Task Status not found",
+			})
+		}
+
+		return echoCtx.JSON(http.StatusOK, constant.ArrayResponse[models.RefTaskStatus]{
+			HttpCode: http.StatusOK,
+			Message:  "Success",
+			Data:     data,
 		})
 	}
-
-	return echoCtx.JSON(http.StatusOK, constant.ArrayResponse[models.RefTaskStatus]{
-		HttpCode: http.StatusOK,
-		Message:  "Success",
-		Data:     refTaskStatus,
-	})
 }
