@@ -2,10 +2,9 @@ package routes
 
 import (
 	"github.com/labstack/echo/v5"
-	"gorm.io/gorm"
 )
 
-func Register(echo *echo.Echo, db *gorm.DB) {
+func Register(echo *echo.Echo) {
 	// Register routes below
-	RefTaskStatusRoutes(echo, db)
+	RefTaskStatusRoutes(echo)
 }

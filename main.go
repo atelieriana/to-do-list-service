@@ -1,10 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
-	"to-do-microservices/config"
 	"to-do-microservices/routes"
 
 	"github.com/joho/godotenv"
@@ -27,21 +25,8 @@ func main() {
 	// Register Port
 	port := os.Getenv("APP_PORT")
 
-	// Open Connection to DB
-	db, err := config.ConnectDatabase()
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer func() {
-		sqlDB, _ := db.DB()
-		errClose := sqlDB.Close()
-		if errClose != nil {
-			fmt.Println(errClose)
-		}
-	}()
-
 	// Registering Route
-	routes.Register(runEcho, db)
+	routes.Register(runEcho)
 	if err := runEcho.Start(":" + port); err != nil {
 		log.Fatal(err)
 	}
