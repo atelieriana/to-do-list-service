@@ -13,4 +13,5 @@ func RefTaskStatusRoutes(echo *echo.Echo, db *gorm.DB) {
 
 	routes := echo.Group("/ref-task-status")
 	routes.GET("/list", refTaskStatusHandler.GetListRefTaskStatus)
+	routes.POST("/create", refTaskStatusHandler.CreateRefTaskStatus)
 }

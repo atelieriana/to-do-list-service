@@ -48,8 +48,30 @@ func (h *RefTaskStatusHandler) GetListRefTaskStatus(echoCtx *echo.Context) error
 	})
 }
 
-func (h *RefTaskStatusHandler) CreateRefTaskStatus(ctx context.Context) ([]RefTaskStatusModels, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+// Used for handling request /ref-task-list/create
+func (h *RefTaskStatusHandler) CreateRefTaskStatus(echoCtx *echo.Context) error {
+	var createValidation CreateRequest
+
+	if err := echoCtx.Bind(&createValidation); err != nil {
+		return echoCtx.JSON(http.StatusBadRequest, http_response.BadRequestResponse{
+			HttpCode: http.StatusBadRequest,
+			Message:  err.Error(),
+		})
+	}
+
+	// Validation
+	if validationError := CreateRequestValidation(createValidation); len(validationError) > 0 {
+		return echoCtx.JSON(http.StatusBadRequest, http_response.ValidationErrorResponse{
+			HttpCode: http.StatusBadRequest,
+			Message:  validationError,
+		})
+	}
+
+	_, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	return echoCtx.JSON(http.StatusOK, http_response.SingleResponse{
+		HttpCode: http.StatusCreated,
+		Message:  "Success",
+	})
 }
