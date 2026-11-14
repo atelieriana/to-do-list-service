@@ -1,4 +1,4 @@
-package constant
+package http_response
 
 type SingleResponse struct {
 	HttpCode int    `json:"code"`
@@ -13,11 +13,6 @@ type ArrayResponse[T any] struct {
 }
 
 type EmptyResponse struct {
-	HttpCode int    `json:"code"`
-	Message  string `json:"message"`
-}
-
-type BadRequestResponse struct {
 	HttpCode int    `json:"code"`
 	Message  string `json:"message"`
 }
