@@ -6,16 +6,27 @@ import (
 	"time"
 	"to-do-microservices/constant"
 	"to-do-microservices/models"
-	"to-do-microservices/repositories"
 
 	"github.com/labstack/echo/v5"
 )
 
-func GetListRefTaskStatus(echoCtx *echo.Context) error {
+type RefTaskStatusRepository interface {
+	GetListTaskStatusQuery(ctx context.Context) ([]models.RefTaskStatus, error)
+}
+
+type RefTaskStatusHandler struct {
+	repository RefTaskStatusRepository
+}
+
+func NewRefTaskStatusHandler(repository RefTaskStatusRepository) *RefTaskStatusHandler {
+	return &RefTaskStatusHandler{repository: repository}
+}
+
+func (h *RefTaskStatusHandler) GetListRefTaskStatus(echoCtx *echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	data, err := repositories.GetListTaskStatus(ctx)
+	data, err := h.repository.GetListTaskStatusQuery(ctx)
 	if err != nil {
 		return echoCtx.JSON(http.StatusInternalServerError, constant.BadRequestResponse{
 			HttpCode: http.StatusInternalServerError,

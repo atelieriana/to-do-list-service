@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"sync"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -22,20 +21,7 @@ type Database struct {
 	Schema   string
 }
 
-var (
-	dbInstance *gorm.DB
-	dbOnce     sync.Once
-	dbErr      error
-)
-
 func ConnectDatabase() (*gorm.DB, error) {
-	dbOnce.Do(func() {
-		dbInstance, dbErr = openDatabase()
-	})
-	return dbInstance, dbErr
-}
-
-func openDatabase() (*gorm.DB, error) {
 	conf := getDataFromEnv()
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s search_path=%s sslmode=disable",
