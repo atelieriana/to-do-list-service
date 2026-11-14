@@ -11,11 +11,19 @@ import (
 	"github.com/labstack/echo/v5"
 )
 
-func GetListRefTaskStatus(echoCtx *echo.Context) error {
+type RefTaskStatusHandler struct {
+	repository *repositories.RefTaskStatusRepository
+}
+
+func NewRefTaskStatusHandler(repository *repositories.RefTaskStatusRepository) *RefTaskStatusHandler {
+	return &RefTaskStatusHandler{repository: repository}
+}
+
+func (h *RefTaskStatusHandler) GetListRefTaskStatus(echoCtx *echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	data, err := repositories.GetListTaskStatus(ctx)
+	data, err := h.repository.GetListTaskStatus(ctx)
 	if err != nil {
 		return echoCtx.JSON(http.StatusInternalServerError, constant.BadRequestResponse{
 			HttpCode: http.StatusInternalServerError,
