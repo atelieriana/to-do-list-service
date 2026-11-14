@@ -1,8 +1,8 @@
-package models
+package ref_task_status
 
 import "time"
 
-type RefTaskStatus struct {
+type RefTaskStatusModels struct {
 	ID         int        `gorm:"primary_key" json:"id,omitempty"`
 	UUID       string     `gorm:"unique" json:"uuid,omitempty"`
 	TaskStatus string     `json:"task_status,omitempty"`
@@ -14,6 +14,6 @@ type RefTaskStatus struct {
 	DeletedAt  *time.Time `json:"deleted_at,omitempty"`
 }
 
-func (RefTaskStatus) TableName() string {
+func (RefTaskStatusModels) TableName() string {
 	return "ref_task_status"
 }

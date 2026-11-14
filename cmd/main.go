@@ -3,11 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
-	"to-do-microservices/config"
-	"to-do-microservices/routes"
+	"to-do-microservices/internal/config"
+	"to-do-microservices/internal/database"
+	"to-do-microservices/internal/server"
 
-	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 )
@@ -15,20 +14,14 @@ import (
 func main() {
 	// Init echo and .env
 	runEcho := echo.New()
-	errDotEnv := godotenv.Load()
-	if errDotEnv != nil {
-		log.Fatal("Error loading .env file")
-	}
+	port := config.GetAppPort()
 
 	// Setup Middleware
 	runEcho.Use(middleware.RequestLogger())
 	runEcho.Use(middleware.Recover())
 
-	// Register Port
-	port := os.Getenv("APP_PORT")
-
 	// Open Connection to Database
-	db, err := config.ConnectDatabase()
+	db, err := database.ConnectPostgres()
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -40,7 +33,7 @@ func main() {
 	}()
 
 	// Registering Route
-	routes.Register(runEcho, db)
+	server.Register(runEcho, db)
 	if err := runEcho.Start(":" + port); err != nil {
 		log.Fatal(err)
 	}

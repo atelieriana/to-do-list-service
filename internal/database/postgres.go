@@ -1,4 +1,4 @@
-package config
+package database
 
 import (
 	"context"
@@ -21,7 +21,7 @@ type Database struct {
 	Schema   string
 }
 
-func ConnectDatabase() (*gorm.DB, error) {
+func ConnectPostgres() (*gorm.DB, error) {
 	conf := getDataFromEnv()
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s search_path=%s sslmode=disable",
